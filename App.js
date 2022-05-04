@@ -6,7 +6,7 @@
  * @flow strict-local
  */
 
-import React from 'react';
+import React , {useState, useEffect} from 'react';
 
 import {
   SafeAreaView,
@@ -34,9 +34,10 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome5';
 
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-
 import { NavigationContainer } from '@react-navigation/native';
-import QRScanScreen from './src/QRScanScreen';
+import QRScanScreen from './src/components/QRScanScreen';
+import {useExamStateStore} from './src/states/AllStates'
+
 
 const Tab = createBottomTabNavigator();
 
@@ -53,8 +54,24 @@ const userList = [
 
 
 const  UserCard = item => {
+
+  const {updateStudentID, studentID} = useExamStateStore();
+  const [idSelected, setIDselected] = useState(false);
+  
+  
+  function selectStudent(name){
+    updateStudentID(name);
+    
+  }
+
+  useEffect(()=>{
+     setIDselected(studentID && studentID.length >1 && studentID==item.name );
+     console.log(`student Id updated to ${studentID}`) 
+  },[studentID])
+
   return(
-    <TouchableOpacity style={{flexDirection:"row", marginVertical:5, paddingVertical:10, paddingHorizontal:5, borderColor:"black", borderRadius:15, width:scrWidth*0.9, elevation:1, backgroundColor:"#6495ed"}}>
+
+    <TouchableOpacity onPress={()=>{selectStudent(item.name)}} style={{flexDirection:"row", marginVertical:5, paddingVertical:10, paddingHorizontal:5, borderColor:"black", borderRadius:15, width:scrWidth*0.9, elevation:1, backgroundColor: idSelected ? "lightgreen": "#6495ed"}}>
         <View style={{flex:1.3}}>
           <Image  style={{resizeMode:"cover", borderRadius:20, width:40, height:40}} source={item.img} />
         </View>
@@ -119,13 +136,23 @@ const App = props => {
                       <Icon name="user" color={"#6495ed"} size={20} />
                     ), }}
           component={HomeScreen} />
+
+          <Tab.Screen name="Login"
+              options={{
+                tabBarLabel: 'Login',
+                tabBarIcon: ({ color, size }) => (
+                  <Icon name="qrcode" color={"#6495ed"} size={20} />
+                ), }}
+           component={SignInScreen} />
+     
+
           <Tab.Screen name="Exam"
               options={{
                 tabBarLabel: 'Exam',
                 tabBarIcon: ({ color, size }) => (
                   <Icon name="tachometer-alt" color={"#6495ed"} size={20} />
                 ), }}
-           component={SignInScreen} />
+           component={HomeScreen} />
         </Tab.Navigator>
 
     </NavigationContainer>
